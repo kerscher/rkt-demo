@@ -1,4 +1,6 @@
 ---
+image: registry.gitlab.fpcomplete.com/fpco/default-build-image:17
+
 stages:
   - lint
   - build
