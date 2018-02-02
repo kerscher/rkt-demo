@@ -23,7 +23,7 @@ variables:
 
 before_script:
   - 'wget https://github.com/rkt/rkt/releases/download/v${RKT_VERSION}/rkt_${RKT_VERSION}-1_amd64.deb'
-  - 'sudo apt install --yes rkt_${RKT_VERSION}-1_amd64.deb'
+  - 'sudo dpkg --install rkt_${RKT_VERSION}-1_amd64.deb'
   - 'sudo add-apt-repository --yes ppa:projectatomic/ppa'
   - 'sudo apt update'
   - 'sudo apt install --yes buildah'
