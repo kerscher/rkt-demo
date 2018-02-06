@@ -15,6 +15,11 @@ if [ "${1}" != "oci" ] &&
     exit 1
 fi
 
+if [ -z "${2}" ]; then
+    log_error "need to pass image in name:tag format as second parameter"
+    exit 1
+fi
+
 shopt -s expand_aliases
 alias b=buildah
 
@@ -26,5 +31,5 @@ b copy "${container}" "./files/it-works.txt" '/usr/share/nginx/html/it-works.txt
 b commit \
   --format "${1}" \
   --rm \
-  "${container}" "rkt-demo:buildah-${1}"
+  "${container}" "${2}"
 echo "${container}"

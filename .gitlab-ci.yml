@@ -7,11 +7,10 @@ stages:
   - run
 
 variables:
-  PROJECT_NAME: "rkt-demo"
-  RKT_VERSION: "1.29.0"
+  PROJECT_NAME: "docker-ci-demo"
   VERSION_TAG: "${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-  FROM_DOCKER: "docker-from-dockerfile"
-  FROM_BUILDAH: "docker-from-buildah"
+  FROM_DOCKER: "from-dockerfile"
+  FROM_BUILDAH: "from-buildah"
   BUILDAH_IMAGE: "${PROJECT_NAME}-${FROM_BUILDAH}"
   DOCKER_IMAGE: "${PROJECT_NAME}-${FROM_DOCKER}"
   CURRENT_BUILDAH: "${BUILDAH_IMAGE}:${VERSION_TAG}"
@@ -22,69 +21,92 @@ variables:
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
 
 before_script:
-  - 'wget https://github.com/rkt/rkt/releases/download/v${RKT_VERSION}/rkt_${RKT_VERSION}-1_amd64.deb'
-  - 'sudo dpkg --install rkt_${RKT_VERSION}-1_amd64.deb'
-  - 'sudo add-apt-repository --yes ppa:projectatomic/ppa'
-  - 'sudo apt update'
-  - 'sudo apt install --yes buildah'
+  - sudo add-apt-repository --yes ppa:projectatomic/ppa
+  - sudo apt update
+  - sudo apt install --yes buildah skopeo jq
 
 shellcheck:
   stage: lint
   script:
-    - 'sudo apt install --yes shellcheck'
-    - 'make shellcheck'
+    - sudo apt install --yes shellcheck
+    - make shellcheck
 
-oci-from-buildah:
-  stage: build
+gitlab-ci-yml:
+  stage: lint
   script:
-    - 'sudo make oci-from-buildah'
+    - sudo apt install --yes yamllint
+    - yamllint .gitlab-ci.yml
+
+oci-buildah:
+  stage: build
+  when: manual
+  script:
+    - echo 'Unimplemented'
+    - exit 1
   only:
     - master
 
-oci-from-dockerfile:
+oci-dockerfile:
   stage: build
+  when: manual
   script:
-    - 'sudo make oci-from-dockerfile'
+    - echo 'Unimplemented'
+    - exit 1
   only:
     - master
 
-docker-from-buildah:
+docker-buildah:
   stage: build
   variables:
     LATEST_IMAGE: "${BUILDAH_IMAGE}:latest"
   script:
-    - 'sudo make docker-from-buildah'
-    - 'sudo buildah commit --creds=gitlab-ci-token:${CI_BUILD_TOKEN} docker://${CI_REGISTRY}/${CURRENT_BUILDAH}'
-    - 'docker tag "${CURRENT_BUILDAH}" "${LATEST_IMAGE}"'
-    - 'docker push "${LATEST_IMAGE}"'
+    - sudo make docker-from-buildah
+    - sudo buildah push
+        --creds=gitlab-ci-token:${CI_BUILD_TOKEN}
+        ${CURRENT_BUILDAH}
+        docker://${CI_REGISTRY}/${CURRENT_BUILDAH}
+    - docker tag "${CURRENT_BUILDAH}" "${LATEST_IMAGE}"
+    - docker push "${LATEST_IMAGE}"
+    - skopeo inspect docker://${CI_REGISTRY}/${CURRENT_BUILDAH} |
+        jq -r '.Digest'
+        > 'docker-buildah.sha256'
   only:
     - master
 
-docker-from-dockerfile:
+docker-dockerfile:
   stage: build
   variables:
     LATEST_IMAGE: "${DOCKER_IMAGE}:latest"
   script:
-    - 'docker build -t "${CURRENT_DOCKER}" scripts/build'
+    - docker build -t "${CURRENT_DOCKER}" scripts/build
     - *REGISTRYLOGIN
-    - 'docker push "${CURRENT_DOCKER}"'
-    - 'docker tag "${CURRENT_DOCKER}" "${LATEST_IMAGE}"'
-    - 'docker push "${LATEST_IMAGE}"'
+    - docker push "${CURRENT_DOCKER}"
+    - docker tag "${CURRENT_DOCKER}" "${LATEST_IMAGE}"
+    - docker push "${LATEST_IMAGE}"
+    - skopeo inspect docker://${CI_REGISTRY/${CURRENT_DOCKER} |
+        jq -r '.Digest'
+        > 'docker-dockerfile.sha256'
   only:
     - master
 
-docker:
+buildah-image:
   stage: run
   script:
-    - 'echo "Unimplemented"'
-    - 'exit 1'
+    - *REGISTRYLOGIN
+    - docker pull "${DOCKER_IMAGE}@$(cat docker-buildah.sha256)"
+    - c=$(docker run --detach "${DOCKER_IMAGE}@$(cat docker-buildah.sha256)")
+    - docker stop "${c}"
+    - docker rm "${c}"
   only:
     - master
 
-rkt:
+docker-image:
   stage: run
   script:
-    - 'echo "Unimplemented"'
-    - 'exit 1'
+    - *REGISTRYLOGIN
+    - docker pull "${DOCKER_IMAGE}@$(cat docker-dockerfile.sha256)"
+    - c=$(docker run --detach "${DOCKER_IMAGE}@$(cat docker-dockerfile.sha256")
+    - docker stop "${c}"
+    - docker rm "${c}"
   only:
-    - master
+    master

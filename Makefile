@@ -18,7 +18,7 @@ oci-from-dockerfile:
 
 ## Docker image from `buildah bud` Dockerfile conversion
 docker-from-buildah:
-	@./scripts/build/with-buildah-create.sh 'docker'
+	@./scripts/build/with-buildah-create.sh 'docker' "${CURRENT_BUILDAH}"
 
 ## Show help screen
 help:
