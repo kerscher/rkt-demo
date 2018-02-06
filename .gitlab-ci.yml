@@ -34,7 +34,7 @@ shellcheck:
 gitlab-ci-yml:
   stage: lint
   script:
-    - sudo apt-get install --reinstall python-pkg-resources
+    - sudo apt-get install --reinstall python3-pkg-resources
     - sudo apt-get install --yes yamllint
     - yamllint .gitlab-ci.yml
 
