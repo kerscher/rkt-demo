@@ -8,13 +8,8 @@ stages:
 
 variables:
   PROJECT_NAME: "docker-ci-demo"
-  VERSION_TAG: "${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-  FROM_DOCKER: "from-dockerfile"
-  FROM_BUILDAH: "from-buildah"
-  BUILDAH_IMAGE: "${PROJECT_NAME}-${FROM_BUILDAH}"
-  DOCKER_IMAGE: "${PROJECT_NAME}-${FROM_DOCKER}"
-  CURRENT_BUILDAH: "${BUILDAH_IMAGE}:${VERSION_TAG}"
-  CURRENT_DOCKER: "${DOCKER_IMAGE}:${VERSION_TAG}"
+  BUILDAH_IMAGE: "docker-ci-demo-from-buildah"
+  DOCKER_IMAGE: "docker-ci-demo-from-docker"
 
 .anchors:
   - &REGISTRYLOGIN
@@ -59,16 +54,17 @@ oci-dockerfile:
 docker-buildah:
   stage: build
   variables:
-    LATEST_IMAGE: "${BUILDAH_IMAGE}:latest"
+    IMAGE: "${BUILDAH_IMAGE}:${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
+    LATEST: "${BUILDAH_IMAGE}:latest"
   script:
     - sudo make docker-from-buildah
     - sudo buildah push
-        --creds=gitlab-ci-token:${CI_BUILD_TOKEN}
-        ${CURRENT_BUILDAH}
-        docker://${CI_REGISTRY}/${CURRENT_BUILDAH}
-    - docker tag "${CURRENT_BUILDAH}" "${LATEST_IMAGE}"
-    - docker push "${LATEST_IMAGE}"
-    - skopeo inspect docker://${CI_REGISTRY}/${CURRENT_BUILDAH} |
+        --creds="gitlab-ci-token:${CI_BUILD_TOKEN}"
+        "${IMAGE}"
+        "docker://${CI_REGISTRY}/${IMAGE}"
+    - docker tag "${IMAGE}" "${LATEST}"
+    - docker push "${LATEST}"
+    - skopeo inspect "docker://${CI_REGISTRY}/${IMAGE}" |
         jq -r '.Digest'
         > 'docker-buildah.sha256'
   only:
@@ -77,14 +73,15 @@ docker-buildah:
 docker-dockerfile:
   stage: build
   variables:
-    LATEST_IMAGE: "${DOCKER_IMAGE}:latest"
+    IMAGE: "${DOCKER_IMAGE}:${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
+    LATEST: "${DOCKER_IMAGE}:latest"
   script:
-    - docker build -t "${CURRENT_DOCKER}" scripts/build
+    - docker build -t "${IMAGE}" scripts/build
     - *REGISTRYLOGIN
-    - docker push "${CURRENT_DOCKER}"
-    - docker tag "${CURRENT_DOCKER}" "${LATEST_IMAGE}"
-    - docker push "${LATEST_IMAGE}"
-    - skopeo inspect docker://${CI_REGISTRY/${CURRENT_DOCKER} |
+    - docker push "${IMAGE}"
+    - docker tag "${IMAGE}" "${LATEST}"
+    - docker push "${LATEST}"
+    - skopeo inspect "docker://${CI_REGISTRY}/${IMAGE}" |
         jq -r '.Digest'
         > 'docker-dockerfile.sha256'
   only:
@@ -94,8 +91,8 @@ buildah-image:
   stage: run
   script:
     - *REGISTRYLOGIN
-    - docker pull "${DOCKER_IMAGE}@$(cat docker-buildah.sha256)"
-    - c=$(docker run --detach "${DOCKER_IMAGE}@$(cat docker-buildah.sha256)")
+    - docker pull "${BUILDAH_IMAGE}@$(cat docker-buildah.sha256)"
+    - c=$(docker run --detach "${BUILDAH_IMAGE}@$(cat docker-buildah.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
