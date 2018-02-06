@@ -6,11 +6,6 @@ stages:
   - build
   - run
 
-variables:
-  PROJECT_NAME: "docker-ci-demo"
-  BUILDAH_IMAGE: "docker-ci-demo-from-buildah"
-  DOCKER_IMAGE: "docker-ci-demo-from-docker"
-
 .anchors:
   - &REGISTRYLOGIN
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
@@ -54,8 +49,8 @@ oci-dockerfile:
 docker-buildah:
   stage: build
   variables:
-    IMAGE: "${BUILDAH_IMAGE}:${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-    LATEST: "${BUILDAH_IMAGE}:latest"
+    IMAGE: "${CI_REGISTRY_IMAGE}:buildah_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
+    LATEST: "${CI_REGISTRY_IMAGE}:buildah-latest"
   script:
     - sudo make docker-from-buildah
     - sudo buildah push
@@ -73,8 +68,8 @@ docker-buildah:
 docker-dockerfile:
   stage: build
   variables:
-    IMAGE: "${DOCKER_IMAGE}:${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-    LATEST: "${DOCKER_IMAGE}:latest"
+    IMAGE: "${CI_REGISTRY_IMAGE}:docker_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
+    LATEST: "${CI_REGISTRY_IMAGE}:docker-latest"
   script:
     - docker build -t "${IMAGE}" scripts/build
     - *REGISTRYLOGIN
@@ -91,8 +86,9 @@ buildah-image:
   stage: run
   script:
     - *REGISTRYLOGIN
-    - docker pull "${BUILDAH_IMAGE}@$(cat docker-buildah.sha256)"
-    - c=$(docker run --detach "${BUILDAH_IMAGE}@$(cat docker-buildah.sha256)")
+    - docker pull "${CI_REGISTRY_IMAGE}@$(cat docker-buildah.sha256)"
+    - c=$(docker run
+            --detach "${CI_REGISTRY_IMAGE}@$(cat docker-buildah.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
@@ -102,8 +98,9 @@ docker-image:
   stage: run
   script:
     - *REGISTRYLOGIN
-    - docker pull "${DOCKER_IMAGE}@$(cat docker-dockerfile.sha256)"
-    - c=$(docker run --detach "${DOCKER_IMAGE}@$(cat docker-dockerfile.sha256")
+    - docker pull "${CI_REGISTRY_IMAGE}@$(cat docker-dockerfile.sha256)"
+    - c=$(docker run
+            --detach "${CI_REGISTRY_IMAGE}@$(cat docker-dockerfile.sha256")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
