@@ -2,11 +2,15 @@
 set -eu
 
 log_error(){
-    logger \
-        --tag "$(basename "$0")" \
-        --stderr \
-        --priority 'user.error' \
-        "${1}"
+    if [ -S /dev/log ]; then
+        logger \
+            --tag "$(basename "$0")" \
+            --stderr \
+            --priority 'user.error' \
+            "${1}"
+    else
+        echo "${1}"
+    fi
 }
 
 if [ "${1}" != "oci" ] &&
