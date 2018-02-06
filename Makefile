@@ -6,7 +6,7 @@ SHELL = /bin/bash -O extglob -O globstar -c
 
 ## Lint scripts
 shellcheck:
-	@env shellcheck -x ./**/*.sh
+	@env shellcheck ./**/*.sh
 
 ## OCI image from a sequence of `buildah` commands
 oci-from-buildah:
