@@ -1,5 +1,5 @@
 ---
-image: ubuntu:16.04
+image: registry.gitlab.fpcomplete.com/fpco/default-build-image:1009
 
 stages:
   - lint
@@ -11,8 +11,6 @@ stages:
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
 
 before_script:
-  - apt-get update
-  - apt-get install --yes software-properties-common
   - add-apt-repository --yes ppa:projectatomic/ppa
   - apt-get update
   - apt-get install --yes buildah skopeo jq
