@@ -52,7 +52,7 @@ docker-buildah:
     IMAGE: "${CI_REGISTRY_IMAGE}:buildah_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
     LATEST: "${CI_REGISTRY_IMAGE}:buildah-latest"
   script:
-    - sudo make docker-from-buildah
+    - sudo make IMAGE="${IMAGE}" docker-from-buildah
     - sudo buildah push
         --creds="gitlab-ci-token:${CI_BUILD_TOKEN}"
         "${IMAGE}"
