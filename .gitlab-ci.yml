@@ -109,4 +109,4 @@ docker-image:
     - docker stop "${c}"
     - docker rm "${c}"
   only:
-    master
+    - master
