@@ -22,13 +22,13 @@ variables:
 
 before_script:
   - sudo add-apt-repository --yes ppa:projectatomic/ppa
-  - sudo apt update
-  - sudo apt install --yes buildah skopeo jq
+  - sudo apt-get update
+  - sudo apt-get install --yes buildah skopeo jq
 
 shellcheck:
   stage: lint
   script:
-    - sudo apt install --yes shellcheck
+    - sudo apt-get install --yes shellcheck
     - make shellcheck
 
 gitlab-ci-yml:
