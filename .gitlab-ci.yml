@@ -1,5 +1,5 @@
 ---
-image: registry.gitlab.fpcomplete.com/fpco/default-build-image:17
+image: ubuntu:16.04
 
 stages:
   - lint
