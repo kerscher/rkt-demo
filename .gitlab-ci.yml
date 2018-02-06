@@ -59,7 +59,7 @@ docker-buildah:
         "docker://${CI_REGISTRY}/${IMAGE}"
     - docker tag "${IMAGE}" "${LATEST}"
     - docker push "${LATEST}"
-    - docker inspect "{IMAGE}" -f '{{index .RepoDigests 0}}'
+    - docker inspect "${IMAGE}" -f '{{index .RepoDigests 0}}'
         > 'docker-buildah.sha256'
   only:
     - master
@@ -75,7 +75,7 @@ docker-dockerfile:
     - docker push "${IMAGE}"
     - docker tag "${IMAGE}" "${LATEST}"
     - docker push "${LATEST}"
-    - docker inspect "{IMAGE}" -f '{{index .RepoDigests 0}}'
+    - docker inspect "${IMAGE}" -f '{{index .RepoDigests 0}}'
         > 'docker-dockerfile.sha256'
   only:
     - master
