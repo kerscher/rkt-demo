@@ -11,21 +11,21 @@ stages:
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
 
 before_script:
-  - sudo add-apt-repository --yes ppa:projectatomic/ppa
-  - sudo apt-get update
-  - sudo apt-get install --yes buildah skopeo jq
+  - add-apt-repository --yes ppa:projectatomic/ppa
+  - apt-get update
+  - apt-get install --yes buildah skopeo jq
 
 shellcheck:
   stage: lint
   script:
-    - sudo apt-get install --yes shellcheck
+    - apt-get install --yes shellcheck
     - make shellcheck
 
 gitlab-ci-yml:
   stage: lint
   script:
-    - sudo apt-get install --reinstall python3-pkg-resources
-    - sudo apt-get install --yes yamllint
+    - apt-get install --reinstall python3-pkg-resources
+    - apt-get install --yes yamllint
     - yamllint .gitlab-ci.yml
 
 oci-buildah:
@@ -52,8 +52,8 @@ docker-buildah:
     IMAGE: "${CI_REGISTRY_IMAGE}:buildah_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
     LATEST: "${CI_REGISTRY_IMAGE}:buildah-latest"
   script:
-    - sudo make IMAGE="${IMAGE}" docker-from-buildah
-    - sudo buildah push
+    - make IMAGE="${IMAGE}" docker-from-buildah
+    - buildah push
         --creds="gitlab-ci-token:${CI_BUILD_TOKEN}"
         "${IMAGE}"
         "docker://${CI_REGISTRY}/${IMAGE}"
