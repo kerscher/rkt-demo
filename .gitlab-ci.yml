@@ -55,5 +55,3 @@ docker:
             --detach "$(cat docker-dockerfile.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
-  only:
-    - master
