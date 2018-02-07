@@ -28,53 +28,11 @@ gitlab-ci-yml:
     - apt-get install --yes yamllint
     - yamllint .gitlab-ci.yml
 
-oci-buildah:
-  stage: build
-  when: manual
-  script:
-    - echo 'Unimplemented'
-    - exit 1
-  only:
-    - master
-
-oci-dockerfile:
-  stage: build
-  when: manual
-  script:
-    - echo 'Unimplemented'
-    - exit 1
-  only:
-    - master
-
-docker-buildah:
-  stage: build
-  when: manual
-  variables:
-    IMAGE: "${CI_REGISTRY_IMAGE}:buildah_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-    LATEST: "${CI_REGISTRY_IMAGE}:buildah-latest"
-  script:
-    - make IMAGE="${IMAGE}" docker-from-buildah
-    - buildah push
-        --creds="gitlab-ci-token:${CI_BUILD_TOKEN}"
-        "${IMAGE}"
-        "docker://${CI_REGISTRY}/${IMAGE}"
-    - docker tag "${IMAGE}" "${LATEST}"
-    - docker push "${LATEST}"
-    - docker inspect "${IMAGE}"
-        | jq -r '.[0] | .RepoDigests[0]'
-        > 'docker-buildah.sha256'
-  artifacts:
-    paths:
-      - docker-buildah.sha256
-    expire_in: 1 day
-  only:
-    - master
-
-docker-dockerfile:
+dockerfile:
   stage: build
   variables:
-    IMAGE: "${CI_REGISTRY_IMAGE}:docker_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
-    LATEST: "${CI_REGISTRY_IMAGE}:docker-latest"
+    IMAGE: "${CI_REGISTRY_IMAGE}:${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
+    LATEST: "${CI_REGISTRY_IMAGE}:latest"
   script:
     - docker build -t "${IMAGE}" scripts/build
     - *REGISTRYLOGIN
@@ -91,26 +49,13 @@ docker-dockerfile:
   only:
     - master
 
-buildah-image:
-  stage: run
-  when: manual
-  script:
-    - *REGISTRYLOGIN
-    - docker pull "$(cat docker-buildah.sha256)"
-    - c=$(docker run
-            --detach "$(cat docker-buildah.sha256)")
-    - docker stop "${c}"
-    - docker rm "${c}"
-  only:
-    - master
-
 docker-image:
   stage: run
   script:
     - *REGISTRYLOGIN
     - docker pull "$(cat docker-dockerfile.sha256)"
     - c=$(docker run
-            --detach "$(cat docker-dockerfile.sha256")
+            --detach "$(cat docker-dockerfile.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
