@@ -10,11 +10,6 @@ stages:
   - &REGISTRYLOGIN
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
 
-before_script:
-  - add-apt-repository --yes ppa:projectatomic/ppa
-  - apt-get update
-  - apt-get install --yes buildah skopeo jq
-
 shellcheck:
   stage: lint
   script:
