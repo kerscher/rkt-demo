@@ -13,10 +13,10 @@ stages:
 shellcheck:
   stage: lint
   script:
-    - apt-get install --yes shellcheck
-    - make shellcheck
+    - docker pull koalaman/shellcheck:v0.4.7
+    - docker run -v "${PWD}/mnt" koalaman/shellcheck ./**/*.sh
 
-gitlab-ci-yml:
+yamllint:
   stage: lint
   script:
     - apt-get install --reinstall python3-pkg-resources
