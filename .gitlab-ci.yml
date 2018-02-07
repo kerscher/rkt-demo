@@ -63,6 +63,10 @@ docker-buildah:
     - docker inspect "${IMAGE}"
         | jq -r '.[0] | .RepoDigests[0]'
         > 'docker-buildah.sha256'
+  artifacts:
+    paths:
+      - docker-buildah.sha256
+    expire_in: 1 day
   only:
     - master
 
@@ -80,6 +84,10 @@ docker-dockerfile:
     - docker inspect "${IMAGE}"
         | jq -r '.[0] | .RepoDigests[0]'
         > 'docker-dockerfile.sha256'
+  artifacts:
+    paths:
+      - docker-dockerfile.sha256
+    expire_in: 1 day
   only:
     - master
 
