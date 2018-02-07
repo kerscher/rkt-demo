@@ -96,9 +96,9 @@ buildah-image:
   when: manual
   script:
     - *REGISTRYLOGIN
-    - docker pull "${CI_REGISTRY_IMAGE}@$(cat docker-buildah.sha256)"
+    - docker pull "$(cat docker-buildah.sha256)"
     - c=$(docker run
-            --detach "${CI_REGISTRY_IMAGE}@$(cat docker-buildah.sha256)")
+            --detach "$(cat docker-buildah.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
@@ -108,9 +108,9 @@ docker-image:
   stage: run
   script:
     - *REGISTRYLOGIN
-    - docker pull "${CI_REGISTRY_IMAGE}@$(cat docker-dockerfile.sha256)"
+    - docker pull "$(cat docker-dockerfile.sha256)"
     - c=$(docker run
-            --detach "${CI_REGISTRY_IMAGE}@$(cat docker-dockerfile.sha256")
+            --detach "$(cat docker-dockerfile.sha256")
     - docker stop "${c}"
     - docker rm "${c}"
   only:
