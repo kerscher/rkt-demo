@@ -85,6 +85,7 @@ docker-dockerfile:
 
 buildah-image:
   stage: run
+  when: manual
   script:
     - *REGISTRYLOGIN
     - docker pull "${CI_REGISTRY_IMAGE}@$(cat docker-buildah.sha256)"
