@@ -46,7 +46,7 @@ dockerfile:
     paths:
       - docker-dockerfile.sha256
 
-docker-image:
+docker:
   stage: run
   script:
     - *REGISTRYLOGIN
