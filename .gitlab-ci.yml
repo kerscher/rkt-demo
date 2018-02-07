@@ -48,6 +48,7 @@ oci-dockerfile:
 
 docker-buildah:
   stage: build
+  when: manual
   variables:
     IMAGE: "${CI_REGISTRY_IMAGE}:buildah_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
     LATEST: "${CI_REGISTRY_IMAGE}:buildah-latest"
@@ -67,7 +68,6 @@ docker-buildah:
 
 docker-dockerfile:
   stage: build
-  when: manual
   variables:
     IMAGE: "${CI_REGISTRY_IMAGE}:docker_${CI_BUILD_REF_SLUG}_${CI_PIPELINE_ID}"
     LATEST: "${CI_REGISTRY_IMAGE}:docker-latest"
