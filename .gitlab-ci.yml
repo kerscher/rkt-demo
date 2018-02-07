@@ -45,9 +45,6 @@ dockerfile:
   artifacts:
     paths:
       - docker-dockerfile.sha256
-    expire_in: 1 day
-  only:
-    - master
 
 docker-image:
   stage: run
