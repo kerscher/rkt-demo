@@ -60,7 +60,7 @@ docker-buildah:
     - docker tag "${IMAGE}" "${LATEST}"
     - docker push "${LATEST}"
     - docker inspect "${IMAGE}"
-        | jq '.RepoDigests[0]'
+        | jq -r '.[0] | .RepoDigests[0]'
         > 'docker-buildah.sha256'
   only:
     - master
@@ -77,7 +77,7 @@ docker-dockerfile:
     - docker tag "${IMAGE}" "${LATEST}"
     - docker push "${LATEST}"
     - docker inspect "${IMAGE}"
-        | jq '.RepoDigests[0]'
+        | jq -r '.[0] | .RepoDigests[0]'
         > 'docker-dockerfile.sha256'
   only:
     - master
