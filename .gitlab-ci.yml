@@ -17,7 +17,7 @@ shellcheck:
     SHA: sha256:22bd736eb6c3cb8e15b888cf3d244839cc5bb35a5858feeb61a9e9bbfd7c7337
   script:
     - docker pull "${IMAGE}@${SHA}"
-    - docker run -v "${PWD}/mnt" "${IMAGE}" ./**/*.sh
+    - docker run -v "${PWD}:/mnt" "${IMAGE}@${SHA}" $(find -name '*.sh')
 
 yamllint:
   stage: lint
@@ -26,7 +26,9 @@ yamllint:
     SHA: sha256:22b33626d57e990399d38ecc648884fb44ab9638eb1d3e1a2ab835864427ec20
   script:
     - docker pull "${IMAGE}@${SHA}"
-    - docker run -v "${PWD}/:/app" "${IMAGE}" .gitlab-ci.yml
+    - docker run -v "${PWD}/:/app"
+                    "${IMAGE}@{SHA}"
+                    $(find -name '*.yml' -o -name '*.yaml')
 
 dockerfile:
   stage: build
