@@ -6,6 +6,9 @@ stages:
   - build
   - run
 
+variables:
+  PROJECT: rkt-demo
+
 .anchors:
   - &REGISTRYLOGIN
     docker login -u gitlab-ci-token -p "${CI_BUILD_TOKEN}" "${CI_REGISTRY}"
@@ -43,17 +46,17 @@ dockerfile:
     - docker push "${LATEST}"
     - docker inspect "${IMAGE}"
         | jq -r '.[0] | .RepoDigests[0]'
-        > 'docker-dockerfile.sha256'
+        > '${PROJECT}.sha256'
   artifacts:
     paths:
-      - docker-dockerfile.sha256
+      - '${PROJECT}.sha256'
 
 docker:
   stage: run
   script:
     - *REGISTRYLOGIN
-    - docker pull "$(cat docker-dockerfile.sha256)"
+    - docker pull "$(cat ${PROJECT}.sha256)"
     - c=$(docker run
-            --detach "$(cat docker-dockerfile.sha256)")
+            --detach "$(cat ${PROJECT}.sha256)")
     - docker stop "${c}"
     - docker rm "${c}"
