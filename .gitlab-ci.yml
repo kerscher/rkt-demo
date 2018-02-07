@@ -1,5 +1,5 @@
 ---
-image: registry.gitlab.fpcomplete.com/fpco/default-build-image:1009
+image: docker:17.12.0-ce
 
 stages:
   - lint
@@ -45,7 +45,7 @@ dockerfile:
     - docker tag "${IMAGE}" "${LATEST}"
     - docker push "${LATEST}"
     - docker inspect "${IMAGE}"
-        | jq -r '.[0] | .RepoDigests[0]'
+        -f '{{index .RepoDigests 0}}'
         > '${PROJECT}.sha256'
   artifacts:
     paths:
