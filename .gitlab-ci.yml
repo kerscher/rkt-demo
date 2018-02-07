@@ -12,9 +12,12 @@ stages:
 
 shellcheck:
   stage: lint
+  variables:
+    IMAGE: koalaman/shellcheck
+    SHA: sha256:22bd736eb6c3cb8e15b888cf3d244839cc5bb35a5858feeb61a9e9bbfd7c7337
   script:
-    - docker pull koalaman/shellcheck:v0.4.7
-    - docker run -v "${PWD}/mnt" koalaman/shellcheck ./**/*.sh
+    - docker pull "${IMAGE}@${SHA}"
+    - docker run -v "${PWD}/mnt" "${IMAGE}" ./**/*.sh
 
 yamllint:
   stage: lint
