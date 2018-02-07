@@ -21,10 +21,12 @@ shellcheck:
 
 yamllint:
   stage: lint
+  variables:
+    IMAGE: dcycle/yaml-lint
+    SHA: sha256:22b33626d57e990399d38ecc648884fb44ab9638eb1d3e1a2ab835864427ec20
   script:
-    - apt-get install --reinstall python3-pkg-resources
-    - apt-get install --yes yamllint
-    - yamllint .gitlab-ci.yml
+    - docker pull "${IMAGE}@${SHA}"
+    - docker run -v "${PWD}/:/app" "${IMAGE}" .gitlab-ci.yml
 
 dockerfile:
   stage: build
